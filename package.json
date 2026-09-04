@@ -1,0 +1,62 @@
+{
+  "name": "rex-hud",
+  "version": "2.1.0",
+  "description": "Rex - a HUD-style desktop AI assistant with web search, image generation, 3D model generation, and full mouse/keyboard/screen control.",
+  "main": "main.js",
+  "private": true,
+  "author": "bob",
+  "scripts": {
+    "postinstall": "node scripts/prepare-vendor.js",
+    "start": "electron .",
+    "dist": "electron-builder --win portable",
+    "dist:installer": "electron-builder --win nsis",
+    "dist:mac": "electron-builder --mac dir",
+    "dist:linux": "electron-builder --linux AppImage"
+  },
+  "devDependencies": {
+    "electron": ">=33.0.0",
+    "electron-builder": ">=25.0.0"
+  },
+  "dependencies": {
+    "three": ">=0.169.0",
+    "ws": "^8.18.0",
+    "twilio": "^6.0.0"
+  },
+  "build": {
+    "appId": "com.bob.rex-hud",
+    "productName": "Rex",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "assets/**/*",
+      "!renderer/vendor/**/.gitkeep"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "portable": {
+      "artifactName": "Rex.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Rex-Setup.exe"
+    },
+    "mac": {
+      "target": "dir",
+      "icon": "assets/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png",
+      "category": "Utility"
+    }
+  }
+}

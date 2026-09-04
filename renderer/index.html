@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self';" />
+<title>REX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/build/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="topbar">
+    <div class="status" id="statusText">LISTENING OFF</div>
+    <h1 class="brand">REX</h1>
+    <button class="round-btn info-btn" id="infoBtn" aria-label="Info">i</button>
+  </header>
+
+  <div class="hairline"></div>
+
+  <main class="stage" id="stage">
+    <canvas id="scene"></canvas>
+
+    <div class="dock dock-left">
+      <button class="dock-btn" id="typeDockBtn" title="Type a command instead of speaking">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M17 10h.01M7 14h6"/></svg>
+      </button>
+      <button class="dock-btn" id="searchDockBtn" title="Quick web search">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.3" y1="15.3" x2="20.5" y2="20.5"/></svg>
+      </button>
+      <button class="dock-btn" id="muteDockBtn" title="Mute Rex voice">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="muteIcon"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9c1.1 1 1.7 2.2 1.7 3.5S17.1 15.5 16 16.5" id="wave1"/><path d="M18.5 6.5c2 1.8 3.1 4 3.1 5.5s-1.1 4-3.1 5.8" id="wave2"/></svg>
+      </button>
+    </div>
+
+    <button class="round-btn help-btn" id="helpBtn" aria-label="Help">?</button>
+
+    <div class="transcript-wrap">
+      <div class="transcript" id="transcript"></div>
+    </div>
+  </main>
+
+  <footer class="dock-bottom">
+    <button class="foot-btn" id="historyBtn" title="Conversation log">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+      <span>LOG</span>
+    </button>
+    <button class="foot-btn" id="shareBtn" title="Copy transcript">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M8.1 10.9 15.9 7 M8.1 13.1 15.9 17"/></svg></span>
+      <span>SHARE</span>
+    </button>
+    <button class="foot-btn mic-btn" id="micBtn" title="Talk to Rex">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21.5"/><line x1="8.5" y1="21.5" x2="15.5" y2="21.5"/></svg></span>
+      <span id="micLabel">TALK</span>
+    </button>
+    <button class="foot-btn" id="settingsBtn" title="Setup &amp; voice">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="16" cy="12" r="2"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="11" cy="17" r="2"/></svg></span>
+      <span>SETUP</span>
+    </button>
+    <button class="foot-btn" id="themeBtn" title="Cycle core color">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,3 20,8 20,16 12,21 4,16 4,8"/><circle cx="12" cy="12" r="3"/></svg></span>
+      <span>CORE</span>
+    </button>
+  </footer>
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+<!-- Settings -->
+<div class="panel" id="settingsPanel">
+  <button class="panel-close" data-close>&times;</button>
+  <h2>SETUP</h2>
+
+  <label class="field-label">REX VOICE &mdash; FISH AUDIO API KEY (optional)</label>
+  <input type="password" id="fishKeyInput" placeholder="fa-xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+  <div class="hint">From <a href="#" data-ext="https://fish.audio">fish.audio</a>. Without a key, Rex speaks with your system voice instead.</div>
+
+  <label class="field-label">VOICE MODEL ID</label>
+  <input type="text" id="fishVoiceInput" />
+
+  <label class="field-label">FISH MODEL VERSION HEADER</label>
+  <input type="text" id="fishModelInput" />
+
+  <div class="row">
+    <button class="btn" id="testVoiceBtn">TEST VOICE</button>
+  </div>
+
+  <hr class="div"/>
+
+  <label class="field-label">AI BRAIN &amp; IMAGE GENERATION &mdash; OPENAI API KEY</label>
+  <input type="password" id="openaiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+  <div class="hint">From <a href="#" data-ext="https://platform.openai.com/api-keys">platform.openai.com</a>. This is the important one &mdash; add it to give Rex real conversation, memory, and the judgement to pick the right tool for what you ask. Without it, Rex falls back to a short list of fixed phrases (see Help).</div>
+  <label class="field-label">AI MODEL</label>
+  <input type="text" id="aiModelInput" />
+  <div class="hint">Only change this if you get a "model" error &mdash; check <a href="#" data-ext="https://platform.openai.com/docs/models">platform.openai.com/docs/models</a> for the current name.</div>
+  <label class="field-label">IMAGE MODEL</label>
+  <input type="text" id="openaiModelInput" />
+
+  <hr class="div"/>
+
+  <label class="field-label">SHOW ME PICTURES &mdash; WEB IMAGE SEARCH API KEY (optional)</label>
+  <input type="password" id="imageSearchKeyInput" placeholder="your serper.dev key" autocomplete="off" />
+  <div class="hint">Real photos from the web (not AI-generated) &mdash; e.g. &ldquo;show me pictures of the northern lights&rdquo;. Free key, no card needed, from <a href="#" data-ext="https://serper.dev">serper.dev</a> (sign up &rarr; Dashboard &rarr; API Key).</div>
+
+  <hr class="div"/>
+
+  <label class="field-label">3D MODELS &mdash; MESHY AI API KEY (optional)</label>
+  <input type="password" id="meshyKeyInput" placeholder="msy-xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+  <div class="hint">From <a href="#" data-ext="https://www.meshy.ai">meshy.ai</a>. Without a key, &ldquo;generate a 3D model of &hellip;&rdquo; still works &mdash; Rex builds an instant procedural HUD shape instead of a real AI mesh.</div>
+
+  <hr class="div"/>
+
+  <label class="field-label">CONNECT YOUR ACCOUNTS (optional)</label>
+  <div class="hint">Each needs a free Client ID you get by registering your own app with that provider &mdash; see the README for exact click-by-click steps. Nothing is shared with anyone but that provider.</div>
+
+  <div class="connect-row">
+    <input type="text" id="googleClientIdInput" placeholder="Google Client ID" autocomplete="off" />
+    <button class="btn" id="connectGmailBtn">CONNECT GMAIL</button>
+  </div>
+  <input type="password" id="googleClientSecretInput" placeholder="Google Client Secret (only add if Connect fails)" autocomplete="off" style="margin-top:6px;" />
+  <div class="hint">Expect a &ldquo;Google hasn&rsquo;t verified this app&rdquo; screen &mdash; that&rsquo;s normal for a personal app, click <b>Advanced &rarr; Go to [app name] (unsafe)</b> to continue. If you instead get blocked with no way through, your Gmail address probably isn&rsquo;t on the Test users list yet (README has the exact steps).</div>
+  <div class="connect-status" id="gmailStatus">Not connected</div>
+
+  <div class="connect-row">
+    <input type="text" id="microsoftClientIdInput" placeholder="Microsoft Client ID" autocomplete="off" />
+    <button class="btn" id="connectOutlookBtn">CONNECT OUTLOOK</button>
+  </div>
+  <div class="connect-status" id="outlookStatus">Not connected</div>
+
+  <div class="connect-row">
+    <input type="text" id="spotifyClientIdInput" placeholder="Spotify Client ID" autocomplete="off" />
+    <button class="btn" id="connectSpotifyBtn">CONNECT SPOTIFY</button>
+  </div>
+  <div class="connect-status" id="spotifyStatus">Not connected</div>
+  <div class="hint">Spotify playback control needs a Premium account and Spotify already open somewhere (this PC, your phone, or the web player).</div>
+
+  <div class="hint" style="margin-top:14px;">Or connect through a third-party account hub instead &mdash; one login screen that can add Gmail, Outlook, iCloud and more without registering a separate app with each one (it still asks you to register one connector app the first time &mdash; see README).</div>
+  <div class="connect-row">
+    <input type="text" id="nylasClientIdInput" placeholder="Nylas Client ID" autocomplete="off" />
+    <button class="btn" id="connectNylasBtn">CONNECT ACCOUNT</button>
+  </div>
+  <input type="password" id="nylasApiKeyInput" placeholder="Nylas API Key" autocomplete="off" style="margin-top:6px;" />
+  <input type="text" id="nylasApiUriInput" placeholder="API base URL (default: https://api.us.nylas.com)" autocomplete="off" style="margin-top:6px;" />
+  <div class="hint">Free at <a href="#" data-ext="https://dashboard.nylas.com">dashboard.nylas.com</a> &mdash; see the README for exact setup steps. Use https://api.eu.nylas.com instead if you signed up on Nylas's EU region.</div>
+  <div id="nylasGrantsList" style="margin-top:6px;"></div>
+
+  <hr class="div"/>
+
+  <label class="field-label">ADVANCED &mdash; GOOGLE SPEECH API KEY</label>
+  <input type="password" id="googleSpeechKeyInput" placeholder="only needed if voice input errors with “network”" autocomplete="off" />
+  <div class="hint">Leave blank unless clicking the mic gives a &ldquo;network&rdquo; error &mdash; that means this build of Chromium needs its own key for speech recognition. Free key from <a href="#" data-ext="https://console.cloud.google.com/apis/credentials">Google Cloud Console</a> (enable the Speech-to-Text API). Restart the app after saving this.</div>
+
+  <div class="switch-row" style="margin-top:14px;">
+    <span class="field-label" style="margin:0;">ALLOW PC CONTROL &mdash; e.g. &ldquo;open Lunar Client&rdquo;</span>
+    <button class="switch" id="pcControlSwitch"></button>
+  </div>
+  <div class="hint warning">Off by default. When on, Rex can run commands and launch programs on this PC when you ask &mdash; only turn this on for your own trusted machine. Every command run is shown in the transcript so nothing happens silently.</div>
+
+  <div class="switch-row" style="margin-top:14px;">
+    <span class="field-label" style="margin:0;">ALLOW SCREEN &amp; INPUT CONTROL &mdash; e.g. &ldquo;fill in this form&rdquo;</span>
+    <button class="switch" id="screenControlSwitch"></button>
+  </div>
+  <div class="hint warning">Off by default, and separate from PC Control above. When on, Rex can look at a screenshot of this PC and directly move the mouse, click, and type &mdash; full hands-on control, not just launching things. Every step is shown live (including the screenshot it's looking at) with a STOP button, it stops itself after a fixed number of steps either way, and it refuses to type a password or payment details unless you gave it that exact information yourself. It's told which window is actually focused before every action and won't use Alt+F4/Win+L (it clicks a window's own close button instead) &mdash; so it can't accidentally close itself instead of what you meant. Needs a vision-capable AI Model above. Windows only, and it can't reach a window running "as administrator" (Windows blocks that on purpose). Only turn this on for your own trusted PC.</div>
+
+  <div class="switch-row" style="margin-top:14px;">
+    <span class="field-label" style="margin:0;">ALLOW CALLING &mdash; make calls, and screen/forward/decline incoming ones</span>
+    <button class="switch" id="callingSwitch"></button>
+  </div>
+  <div class="hint warning">Off by default, and the most involved feature here to set up &mdash; see the README before turning this on. Real costs and a few accounts are involved: a Twilio phone number (small monthly rental plus a few cents a minute), your own downloaded ngrok agent with a free static domain, and forwarding your real number to the Twilio number through your carrier. When on, Rex can place outbound calls and hold a real spoken conversation on them toward a goal you give it, and answers every inbound call itself &mdash; taking a message and ending the call, or connecting the caller through to you live if it judges it's worth interrupting you for. Every call shows up here, spoken and logged, as it happens.</div>
+  <input type="text" id="twilioAccountSidInput" placeholder="Twilio Account SID" autocomplete="off" style="margin-top:10px;" />
+  <input type="password" id="twilioAuthTokenInput" placeholder="Twilio Auth Token" autocomplete="off" style="margin-top:6px;" />
+  <input type="text" id="twilioPhoneNumberInput" placeholder="Twilio phone number, e.g. +15551234567" autocomplete="off" style="margin-top:6px;" />
+  <input type="text" id="userPhoneNumberInput" placeholder="Your real phone number, e.g. +15559876543" autocomplete="off" style="margin-top:6px;" />
+  <div class="hint">Account SID, Auth Token, and phone number are all from <a href="#" data-ext="https://console.twilio.com">console.twilio.com</a>. Your real number is only ever used as the target when Rex forwards a screened call through to you.</div>
+  <input type="text" id="ngrokExePathInput" placeholder="Path to ngrok.exe (leave blank if it's on PATH)" autocomplete="off" style="margin-top:10px;" />
+  <input type="password" id="ngrokAuthtokenInput" placeholder="ngrok authtoken" autocomplete="off" style="margin-top:6px;" />
+  <input type="text" id="ngrokStaticDomainInput" placeholder="ngrok static domain, e.g. xxxx.ngrok-free.app" autocomplete="off" style="margin-top:6px;" />
+  <div class="hint">Download from <a href="#" data-ext="https://ngrok.com/download">ngrok.com/download</a>, sign up free, and reserve your one free static domain in the dashboard &mdash; this is what lets Twilio reach this PC. Full click-by-click steps in the README.</div>
+  <div class="connect-status" id="callingStatus">Off</div>
+
+  <hr class="div"/>
+
+  <div class="switch-row">
+    <span class="field-label" style="margin:0;">ALWAYS-LISTENING (no wake word)</span>
+    <button class="switch" id="wakeSwitch"></button>
+  </div>
+  <div class="hint warning">Off by default. When on, the mic stays open and Rex responds to anything it hears &mdash; no wake word or Talk click needed. If PC Control or Screen &amp; Input Control above are also on, that means anything picked up nearby &mdash; a TV, a podcast, someone else talking &mdash; could trigger a real action on this PC. Worth leaving off, or muting, in a noisy room.</div>
+  <div class="switch-row">
+    <span class="field-label" style="margin:0;">MUTE VOICE REPLIES</span>
+    <button class="switch" id="muteSwitch"></button>
+  </div>
+
+  <div class="hint" id="voiceStatusHint" style="margin-top:16px;"></div>
+  <div class="hint" style="margin-top:6px;">Settings save automatically to this PC (keys are encrypted at rest) and are never sent anywhere except the service they belong to.</div>
+</div>
+
+<!-- History -->
+<div class="panel" id="historyPanel">
+  <button class="panel-close" data-close>&times;</button>
+  <h2>CONVERSATION LOG</h2>
+  <div id="logList"><div class="empty">Nothing logged yet, sir.</div></div>
+  <div class="row">
+    <button class="btn ghost" id="clearLogBtn">CLEAR LOG</button>
+  </div>
+</div>
+
+<!-- Help -->
+<div class="panel" id="helpPanel">
+  <button class="panel-close" data-close>&times;</button>
+  <h2>WHAT YOU CAN SAY</h2>
+  <div class="hint" id="helpAiNote" style="margin-bottom:14px;">With an OpenAI key set in Setup, just talk to Rex naturally &mdash; no fixed phrases needed. It understands what you want, remembers the conversation so you can ask follow-ups, and picks the right tool itself. A few examples:</div>
+  <ul>
+    <li><b>&ldquo;What's the boiling point of nitrogen?&rdquo;</b> &mdash; or any question; asks the web when it needs to</li>
+    <li><b>&ldquo;Show me some pictures of the northern lights&rdquo;</b> &mdash; real photos from the web</li>
+    <li><b>&ldquo;Paint me a picture of a dragon over a castle&rdquo;</b> &mdash; brand-new AI art</li>
+    <li><b>&ldquo;Build me a 3D model of a crystal&rdquo;</b> &mdash; always works (built-in), or a real AI mesh with a Meshy key</li>
+    <li><b>&ldquo;What's in my inbox?&rdquo;</b> &mdash; once Gmail, Outlook, or the account hub is connected</li>
+    <li><b>&ldquo;What's on my calendar this week?&rdquo;</b> &mdash; once an account is connected through the third-party hub in Setup</li>
+    <li><b>&ldquo;Call the pizza place at 555-0100 and ask if they deliver&rdquo;</b> &mdash; once Calling is turned on in Setup &rarr; Advanced; Rex has the whole conversation itself and tells you how it went</li>
+    <li><b>&ldquo;Remind me to take the bins out at 11&rdquo;</b> &mdash; Rex speaks up on its own when it's time, no need to be talking to it</li>
+    <li><b>&ldquo;Play some Daft Punk&rdquo;</b> / <b>&ldquo;pause&rdquo;</b> / <b>&ldquo;skip&rdquo;</b> &mdash; once Spotify is connected</li>
+    <li><b>&ldquo;Open Lunar Client, then launch Minecraft&rdquo;</b> &mdash; once PC control is turned on in Setup &rarr; Advanced</li>
+    <li><b>&ldquo;Click the login button and fill in my username as bob&rdquo;</b> &mdash; full hands-on mouse/keyboard control, once Screen &amp; Input Control is turned on in Setup &rarr; Advanced (watch it work live, and say &ldquo;stop&rdquo; any time)</li>
+    <li><b>&ldquo;Open YouTube&rdquo;</b>, <b>&ldquo;mute&rdquo;</b>, <b>&ldquo;what time is it&rdquo;</b> &mdash; the small stuff too</li>
+  </ul>
+  <div class="hint" style="margin-top:14px;">Without an OpenAI key, Rex falls back to a short list of fixed phrases: &ldquo;search for &hellip;&rdquo;, &ldquo;what is &hellip;&rdquo;, &ldquo;open &hellip;&rdquo;, &ldquo;draw/generate an image of &hellip;&rdquo;, &ldquo;generate a 3D model of &hellip;&rdquo;, &ldquo;mute/unmute&rdquo;.</div>
+  <div class="hint" style="margin-top:10px;">Click the mic once, speak, and Rex replies when you pause. Turn on <b>always-listening</b> in Setup and it's hands-free from then on &mdash; no wake word, no clicking the mic each time.</div>
+  <div class="hint" style="margin-top:10px;">Incoming calls aren't something you ask for &mdash; once Calling is on, Rex answers and screens every one on its own, and tells you about it here as it happens (say &ldquo;forward that call&rdquo; or &ldquo;decline that call&rdquo; if you want to jump in while it's still talking to them).</div>
+</div>
+
+<!-- Type a command -->
+<div class="panel" id="typePanel">
+  <button class="panel-close" data-close>&times;</button>
+  <h2>TYPE A COMMAND</h2>
+  <div class="kbd-row">
+    <input type="text" id="typeInput" placeholder="e.g. generate a 3d model of a crystal" />
+    <button class="btn" id="typeSendBtn">SEND</button>
+  </div>
+</div>
+
+<!-- Result popup: long answers / generated images / 3D models -->
+<div class="panel result-panel" id="resultPanel">
+  <button class="panel-close" data-close>&times;</button>
+  <h2 id="resultTitle">RESPONSE</h2>
+  <div class="result-subtitle" id="resultSubtitle"></div>
+
+  <div class="result-body" id="resultBody">
+    <p class="result-text" id="resultText"></p>
+    <img class="result-image" id="resultImage" alt="" hidden />
+    <div class="result-image-grid" id="resultImageGrid" hidden></div>
+    <div class="result-email-list" id="resultEmailList" hidden></div>
+    <div class="result-3d-wrap" id="result3dWrap" hidden>
+      <canvas id="result3dCanvas"></canvas>
+      <div class="result-3d-hint">drag to rotate &middot; scroll to zoom</div>
+      <div class="result-3d-progress" id="result3dProgress" hidden></div>
+    </div>
+    <div class="result-computer-wrap" id="resultComputerWrap" hidden>
+      <img class="result-computer-shot" id="resultComputerShot" alt="live screenshot" hidden />
+      <div class="result-computer-step" id="resultComputerStep"></div>
+      <div class="result-computer-status" id="resultComputerStatus"></div>
+    </div>
+  </div>
+
+  <div class="row" id="resultActions">
+    <button class="btn" id="resultSaveBtn" hidden>SAVE</button>
+    <button class="btn ghost" id="resultLinkBtn" hidden>OPEN SOURCE</button>
+    <button class="btn danger" id="resultStopBtn" hidden>STOP</button>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
